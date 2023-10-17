@@ -3,8 +3,8 @@
 
 #pragma warnging(push)
 #pragma warning(disable : 4996)
-// #include <msvc\wx\setup.h>
 #include <wx/wx.h>
+#include <wx/cmdline.h>
 #pragma warnging(pop)
 
 void
@@ -86,21 +86,75 @@ CalcOrigin(wxSize size)
   return wxPoint(x, y);
 }
 
-class cApp : public wxApp
+
+//static const wxCmdLineEntryDesc g_cmdLineDesc[] =
+//{
+//     { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"), wxT("displays help on the command line parameters"),
+//          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+//     { wxCMD_LINE_SWITCH, wxT("t"), wxT("test"), wxT("test switch"),
+//          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_MANDATORY  },
+//     { wxCMD_LINE_SWITCH, wxT("s"), wxT("silent"), wxT("disables the GUI") },
+//
+//     { wxCMD_LINE_NONE }
+//};
+
+static const wxCmdLineEntryDesc g_cmdLineDesc[] =
+{
+     { wxCMD_LINE_SWITCH, "h", "help", "displays help on the command line parameters",
+          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+     { wxCMD_LINE_SWITCH, "t", "test", "test switch",
+          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_MANDATORY  },
+     { wxCMD_LINE_SWITCH, "s", "silent", "disables the GUI" },
+
+     { wxCMD_LINE_NONE }
+};
+
+class App : public wxApp
 {
 public:
   Frame* frame_ = nullptr;
-  cApp(){};
-  ~cApp(){};
+  App(){};
+  ~App(){};
 
+  void OnInitCmdLine(wxCmdLineParser& parser)
+  {
+      parser.SetDesc(g_cmdLineDesc);
+      // must refuse '/' as parameter starter or cannot use "/path" style paths
+      parser.SetSwitchChars(wxT("-"));
+  }
+
+  bool OnCmdLineParsed(wxCmdLineParser& parser)
+  {
+      //silent_mode = parser.Found(wxT("s"));
+      wxMessageBox("parsing args...");
+
+      // to get at your unnamed parameters use
+      wxArrayString args;
+      for (int i = 0; i < parser.GetParamCount(); i++)
+      {
+          args.Add(parser.GetParam(i));
+      }
+
+      // and other command line parameters
+      for (auto& arg : args) {
+          std::cout << arg << std::endl;
+          wxMessageBox(arg);
+      }
+
+      // then do what you need with them.
+
+
+      return true;
+  }
   virtual bool OnInit()
   {
-    auto size = wxSize(300, 150);
-    frame_ = new Frame(CalcOrigin(size), size);
-    frame_->Show();
-    return true;
+      auto size = wxSize(300, 150);
+      frame_ = new Frame(CalcOrigin(size), size);
+      frame_->Show();
+      return true;
   }
   // virtual int OnExit();
 };
 
-wxIMPLEMENT_APP(cApp);
+
+wxIMPLEMENT_APP(App);

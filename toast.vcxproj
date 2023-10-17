@@ -148,7 +148,6 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="toast.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="toast.cpp" />
