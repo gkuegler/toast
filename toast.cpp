@@ -22,8 +22,9 @@ class Panel : public wxPanel {
 public:
     Panel(wxWindow* parent) : wxPanel(parent) {
         // nothing to construct
+        Bind(wxEVT_PAINT, &Panel::PaintEvent, this);
     }
-    void OnPaint(wxPaintEvent& event)
+    void PaintEvent(wxPaintEvent& event)
     {
         // Update();
         const constexpr int border = 0;
