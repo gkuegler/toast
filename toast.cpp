@@ -1,9 +1,12 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#pragma comment(lib, "comctl32")
+#pragma comment(lib, "Rpcrt4")
+
 #pragma warning(push)
 #pragma warning(disable : 4996)
-#include <wx/wxh>
+#include <wx/wx.h>
 #include <wx/cmdline.h>
 #pragma warning(pop)
 
@@ -51,8 +54,8 @@ public:
 class Frame : public wxFrame
 {
 public:
-  wxStaticText title;
-  wxStaticText body;
+  wxStaticText* title;
+  wxStaticText* body;
 
   Frame(wxPoint p, wxSize s)
     : wxFrame(nullptr, wxID_ANY, "Toast - Hello World!", p, s, wxDEFAULT_FRAME_STYLE)
@@ -66,24 +69,24 @@ public:
     auto COLOR_BLACK = wxColour(0, 0, 0);
     
     panel -> SetSize(GetClientSize());
-    panel -> SetBackgroundColour(COLOR_BLACK)
+    panel->SetBackgroundColour(COLOR_BLACK);
 
     // timer = wxTimer(self)
     // timer.StartOnce(milliseconds=2000)
     // timer.StartOnce(milliseconds=5000)
 
-    auto font = wxFont(18, family = wxFONTFAMILY_DEFAULT, style = 0, weight = 90, 
-                  underline = False, faceName ="Consolas", encoding = wxFONTENCODING_DEFAULT)
+    // auto font = wxFont(18, wxFONTFAMILY_DEFAULT, 0, 90, false, "Consolas", wxFONTENCODING_DEFAULT);
 
     
-    title = new wxStaticText(panel, style=wxALIGN_LEFT);
-    title -> SetFont(font);
+    //title = new wxStaticText(panel, wxALIGN_LEFT);
+    title = new wxStaticText(panel, wxID_ANY, "xxx", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+    // title -> SetFont(font);
     title -> SetBackgroundColour(COLOR_BLACK);
     title -> SetForegroundColour(COLOR_YELLOW);
     title -> SetLabel("hello");
 
-    body = new wxStaticText(panel, style=wxALIGN_LEFT);
-    body -> SetFont(font);
+    body = new wxStaticText(panel, wxID_ANY, "xxx", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+    // body -> SetFont(font);
     body -> SetBackgroundColour(COLOR_BLACK);
     body -> SetForegroundColour(COLOR_WHITE);
     body -> SetLabel("world");
@@ -94,27 +97,23 @@ public:
     // client area of the panel.
     // panel.Bind(wxEVT_LEFT_UP, close)
 
-    title -> Bind(wxEVT_LEFT_UP, close);
-    body -> Bind(wxEVT_LEFT_UP, close);
-    Bind(wxEVT_TIMER, close);
+    // Bind( wxEVT_COMMAND_MENU_SELECTED, &MyFrameHandler::OnFrameExit,
+        // &myFrameHandler, wxID_EXIT );
+    // title -> Bind(wxEVT_LEFT_UP, OnClose);
+    // body -> Bind(wxEVT_LEFT_UP, OnClose);
+    // Bind(wxEVT_TIMER, OnClose);
 
     auto sz_main = new wxBoxSizer(wxVERTICAL);
     sz_main -> Add(title, 0, wxEXPAND | wxBOTTOM, 5);
     sz_main -> Add(body, 1, wxEXPAND, 0);
 
-    sub_sizer = new wxBoxSizer(wxVERTICAL);
+    auto sub_sizer = new wxBoxSizer(wxVERTICAL);
     sub_sizer -> Add(sz_main, 1, wxEXPAND | wxALL, 5);
     panel -> SetSizer(sub_sizer);
     
     // Also a weird problem where the panel doesn't
     // fll to the size of the frame.
     panel -> Layout();
-
-
-
-     auto* top = new wxBoxSizer(wxVERTICAL);
-     top->Add(panel, 1, wxEXPAND, 0);
-     this->SetSizer(top);
 
     // Fit not required for panel to expand to frame
     // panel->GetSizer()->Fit(this);
@@ -157,16 +156,16 @@ CalcOrigin(wxSize size)
 //     { wxCMD_LINE_NONE }
 //};
 
-static const wxCmdLineEntryDesc g_cmdLineDesc[] =
-{
-     { wxCMD_LINE_SWITCH, "h", "help", "displays help on the command line parameters",
-          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-     { wxCMD_LINE_SWITCH, "t", "test", "test switch",
-          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_MANDATORY  },
-     { wxCMD_LINE_SWITCH, "s", "silent", "disables the GUI" },
-
-     { wxCMD_LINE_NONE }
-};
+//static const wxCmdLineEntryDesc g_cmdLineDesc[] =
+//{
+//     { wxCMD_LINE_SWITCH, "h", "help", "displays help on the command line parameters",
+//          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+//     { wxCMD_LINE_SWITCH, "t", "test", "test switch",
+//          wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_MANDATORY  },
+//     { wxCMD_LINE_SWITCH, "s", "silent", "disables the GUI" },
+//
+//     { wxCMD_LINE_NONE }
+//};
 
 class App : public wxApp
 {
@@ -175,39 +174,39 @@ public:
   App(){};
   ~App(){};
 
-  void OnInitCmdLine(wxCmdLineParser& parser)
-  {
-      parser.SetDesc(g_cmdLineDesc);
-      // must refuse '/' as parameter starter or cannot use "/path" style paths
-      parser.SetSwitchChars(wxT("-"));
-  }
+  //void OnInitCmdLine(wxCmdLineParser& parser)
+  //{
+  //    parser.SetDesc(g_cmdLineDesc);
+  //    // must refuse '/' as parameter starter or cannot use "/path" style paths
+  //    parser.SetSwitchChars(wxT("-"));
+  //}
 
-  bool OnCmdLineParsed(wxCmdLineParser& parser)
-  {
+  //bool OnCmdLineParsed(wxCmdLineParser& parser)
+  //{
 
-      spdlog::debug("parsing args...");
-      bool silent_mode = parser.Found(wxT("s"));
-      spdlog::debug("silent mode found: {}", silent_mode);
-
-
-      // to get at your unnamed parameters use
-      wxArrayString args;
-      for (int i = 0; i < parser.GetParamCount(); i++)
-      {
-          args.Add(parser.GetParam(i));
-      }
-
-      // and other command line parameters
-      for (auto& arg : args) {
-          std::cout << arg << std::endl;
-          //spdlog::debug("argument: {}", arg.c_str());
-      }
-
-      // then do what you need with them.
+  //    spdlog::debug("parsing args...");
+  //    bool silent_mode = parser.Found(wxT("s"));
+  //    spdlog::debug("silent mode found: {}", silent_mode);
 
 
-      return true;
-  }
+  //    // to get at your unnamed parameters use
+  //    wxArrayString args;
+  //    for (int i = 0; i < parser.GetParamCount(); i++)
+  //    {
+  //        args.Add(parser.GetParam(i));
+  //    }
+
+  //    // and other command line parameters
+  //    for (auto& arg : args) {
+  //        std::cout << arg << std::endl;
+  //        //spdlog::debug("argument: {}", arg.c_str());
+  //    }
+
+  //    // then do what you need with them.
+
+
+  //    return true;
+  //}
   virtual bool OnInit()
   {
       auto logger = spdlog::basic_logger_mt("basic_logger", "app.log");
