@@ -60,9 +60,11 @@ class Frame : public wxFrame
 public:
   wxStaticText* text_title;
   wxStaticText* body;
+  wxTimer* timer;
 
   Frame(wxPoint p, wxSize s, wxString message, wxString title)
-    : wxFrame(nullptr, wxID_ANY, "Toast - Hello World!", p, s, wxDEFAULT_FRAME_STYLE)
+    //: wxFrame(nullptr, wxID_ANY, "Toast - Hello World!", p, s, wxDEFAULT_FRAME_STYLE| wxSTAY_ON_TOP)
+    : wxFrame(nullptr, wxID_ANY, "Toast - Hello World!", p, s, wxCLIP_CHILDREN|wxSTAY_ON_TOP| wxFRAME_NO_TASKBAR)
   {
     auto panel = new wxPanel(this);
     //// auto panel = new wxPanel(this, size=GetClientRect().GetSize());
@@ -75,37 +77,41 @@ public:
     panel -> SetSize(GetClientSize());
     panel->SetBackgroundColour(COLOR_BLACK);
 
-    // timer = wxTimer(self)
-    // timer.StartOnce(milliseconds=2000)
-    // timer.StartOnce(milliseconds=5000)
-
-     //auto font = wxFont(18, wxFONTFAMILY_DEFAULT, 0, 90, false, "Consolas", wxFONTENCODING_DEFAULT);
+    timer = new wxTimer(this);
+#ifndef _DEBUG
+    timer->StartOnce(1500);
+#else
+    timer->StartOnce(5000);
+#endif
 
     
     //title = new wxStaticText(panel, wxALIGN_LEFT);
     text_title = new wxStaticText(panel, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-    // title -> SetFont(font);
     text_title-> SetBackgroundColour(COLOR_BLACK);
     text_title-> SetForegroundColour(COLOR_YELLOW);
-    //text_title-> SetLabel("hello");
+    //Setting the font of the title.
+    auto font_title = text_title->GetFont();
+    font_title.SetPointSize(20);
+    font_title.SetFaceName("Arial");
+    text_title->SetFont(font_title);
 
     body = new wxStaticText(panel, wxID_ANY, message, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-    // body -> SetFont(font);
     body -> SetBackgroundColour(COLOR_BLACK);
     body -> SetForegroundColour(COLOR_WHITE);
-    //body -> SetLabel("world");
+    //Setting the font of the body.
+    auto font_body = body->GetFont();
+    font_body.SetPointSize(18);
+    font_body.SetFaceName("Arial");
+    body->SetFont(font_body);
 
 
     // May not be necessary to bind this to the panel
     // if both the title and body controls take up the entire
     // client area of the panel.
-    // panel.Bind(wxEVT_LEFT_UP, close)
-
-    // Bind( wxEVT_COMMAND_MENU_SELECTED, &MyFrameHandler::OnFrameExit,
-        // &myFrameHandler, wxID_EXIT );
-    // title -> Bind(wxEVT_LEFT_UP, OnClose);
-    // body -> Bind(wxEVT_LEFT_UP, OnClose);
-    // Bind(wxEVT_TIMER, OnClose);
+    // panel.
+    text_title->Bind(wxEVT_LEFT_UP, &Frame::OnMouse, this);
+    body->Bind(wxEVT_LEFT_UP, &Frame::OnMouse, this);
+    Bind(wxEVT_TIMER, &Frame::OnTimer, this);
 
     auto sz_main = new wxBoxSizer(wxVERTICAL);
     sz_main -> Add(text_title, 0, wxEXPAND | wxBOTTOM, 5);
@@ -126,7 +132,8 @@ public:
     Refresh();
   };
 
-  void OnClose(wxCommandEvent& event) { Close(true); }
+  void OnMouse(wxMouseEvent& event) { Close(true); }
+  void OnTimer(wxTimerEvent& event) { Close(true); }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -155,7 +162,6 @@ public:
   Frame* frame_ = nullptr;
   App(){};
   ~App(){};
-
  
   virtual bool OnInit()
   {
@@ -175,6 +181,7 @@ public:
       auto argument_count = wxTheApp->argc;
       spdlog::debug("argument count: {}", argument_count);
 
+#ifndef _DEBUG
       if (argument_count < 3)
       {
           wxLogError("Too few arguments.");
@@ -183,8 +190,12 @@ public:
 
       auto message = wxTheApp->argv[1];
       auto title = wxTheApp->argv[2];      
+#else
+      auto message = wxString("A very long message that hopefully wraps around successfully.");
+      auto title = wxString("A Title!");
+#endif
 
-      auto size = wxSize(300, 150);
+      auto size = wxSize(336, 192);
       frame_ = new Frame(CalcOrigin(size), size, message, title);
       frame_->Show();
 
