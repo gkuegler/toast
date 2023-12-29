@@ -1,12 +1,4 @@
-// Lean and mean prevents winsock version clash
-// between wxWidgets and Windows.h.
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
-#include <string>
-#include <vector>
-
-// Fix wxWidgets and windows linking.
+// Fix wxWidgets and linking on windows.
 #pragma comment(lib, "comctl32")
 #pragma comment(lib, "Rpcrt4")
 
@@ -21,6 +13,15 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include <spdlog/spdlog.h>
 
+// Lean and mean prevents winsock version clash
+// between wxWidgets and Windows.h.
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
+#include <chrono>
+#include <string>
+#include <vector>
+
 class Frame : public wxFrame
 {
 public:
@@ -31,7 +32,7 @@ public:
   Frame(wxPoint p, wxSize s, wxString message, wxString title)
     : wxFrame(nullptr,
               wxID_ANY,
-              "Toast - Hello World!",
+              "default-title",
               p,
               s,
               wxCLIP_CHILDREN | wxSTAY_ON_TOP | wxFRAME_NO_TASKBAR |
@@ -145,7 +146,6 @@ public:
 
     spdlog::set_default_logger(std::move(logger));
     spdlog::flush_every(std::chrono::seconds(2));
-    spdlog::debug("Logging to file!");
 
     // Parse commandline arguments.
     auto arg_count = wxTheApp->argc;
