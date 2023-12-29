@@ -174,13 +174,6 @@
   <ItemGroup>
     <ClCompile Include="toast.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="toast.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="small.ico" />
-    <Image Include="toast.ico" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
